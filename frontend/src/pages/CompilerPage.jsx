@@ -3,8 +3,9 @@ import Header from "../components/Header";
 import CodeEditor from "../components/CodeEditor";
 import Output from "../components/Output";
 import { getAuth, signInWithPopup, GithubAuthProvider, signOut } from "firebase/auth";
+import app from '../firebase';
 
-const auth = getAuth();
+const auth = getAuth(app);
 const provider = new GithubAuthProvider();
 
 const CompilerPage = () => {
