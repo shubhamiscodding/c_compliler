@@ -1,15 +1,34 @@
 import { initializeApp } from 'firebase/app';
+import { getAuth, connectAuthEmulator } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: "AIzaSyCFs0r0FXIkXVWDSYQaUnNtyw7VpHeemn8",
+  authDomain: "online-c-compiler-c4ccb.firebaseapp.com",
+  projectId: "online-c-compiler-c4ccb",
+  storageBucket: "online-c-compiler-c4ccb.appspot.com",
+  messagingSenderId: "229739687141",
+  appId: "1:229739687141:web:2e47849d828e6b4b63380c"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-export default app;
+// Configure auth for development environment
+if (window.location.hostname === 'localhost') {
+  // Don't connect to emulator in production, only use it if explicitly set up
+  // connectAuthEmulator(auth, 'http://localhost:9099');
+}
+
+// Initialize Analytics only if not blocked
+let analytics = null;
+if (typeof window !== 'undefined' && !window.isAnalyticsBlocked) {
+  try {
+    const { getAnalytics } = require('firebase/analytics');
+    analytics = getAnalytics(app);
+  } catch (error) {
+    console.log('Analytics blocked or unavailable');
+  }
+}
+
+export { app, auth, analytics };

@@ -24,13 +24,15 @@ const verifyToken = async (req, res, next) => {
 };
 
 // Compile and run C code
-router.post('/compile', verifyToken, async (req, res) => {
+router.post('/compile', async (req, res) => {
   const { code } = req.body;
-  if (!code) {
-    return res.status(400).json({ error: 'No code provided' });
+  if (!code || typeof code !== 'string') {
+    return res.status(400).json({ error: 'No code provided or invalid code format' });
   }
 
   try {
+    console.log('Received code:', code);
+
     // Capture console.log output
     let output = '';
     const originalLog = console.log;
@@ -46,8 +48,10 @@ router.post('/compile', verifyToken, async (req, res) => {
     const generator = new CodeGenerator();
     const jsCode = generator.generate(ast);
 
+    console.log('Generated JavaScript:', jsCode);
+
     // Execute in VM for safety
-    const context = {};
+    const context = { console: { log: (...args) => output += args.join(' ') + '\n' } };
     vm.createContext(context);
     vm.runInContext(jsCode, context, { timeout: 5000 });
 
@@ -56,7 +60,7 @@ router.post('/compile', verifyToken, async (req, res) => {
 
     res.json({ 
       success: true,
-      output,
+      output: output || "Program executed successfully with no output",
       compiledCode: jsCode 
     });
   } catch (error) {
