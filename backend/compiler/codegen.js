@@ -79,6 +79,32 @@ class CodeGenerator {
       case 'Identifier':
         return node.name;
 
+      case 'ForStatement':
+        let forCode = '';
+        if (node.init) {
+          forCode += `let ${node.init.identifier.name} = ${this.generate(node.init.value)};\n`;
+        }
+        forCode += `for (; ${this.generate(node.condition)}; `;
+        if (node.update) {
+          forCode += `${node.update.left.name} = ${this.generate(node.update.right)}`;
+        }
+        forCode += ') ';
+        if (node.body.type === 'BlockStatement') {
+          forCode += `{\n${node.body.body.map(stmt => this.generateStatement(stmt)).join('\n')}\n}`;
+        } else {
+          forCode += this.generateStatement(node.body);
+        }
+        return forCode;
+
+      case 'AssignmentStatement':
+        return `${node.left.name} = ${this.generate(node.right)};`;
+
+      case 'VariableDeclaration':
+        if (this.isInFunction) {
+          return `let ${node.identifier.name} = ${this.generate(node.value)};`;
+        }
+        return `var ${node.identifier.name} = ${this.generate(node.value)};`;
+
       default:
         throw new Error(`Unknown node type: ${node.type}`);
     }

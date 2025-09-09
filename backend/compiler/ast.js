@@ -89,3 +89,21 @@ export class BlockStatement {
     this.body = body;
   }
 }
+
+export class ForStatement {
+  constructor(init, condition, update, body) {
+    this.type = 'ForStatement';
+    this.init = init;
+    this.condition = condition;
+    this.update = update;
+    this.body = body;
+  }
+}
+
+export class AssignmentStatement {
+  constructor(left, right) {
+    this.type = 'AssignmentStatement';
+    this.left = left;
+    this.right = right;
+  }
+}

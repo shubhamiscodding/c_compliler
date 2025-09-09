@@ -4,7 +4,7 @@ class Lexer {
     this.pos = 0;
     this.tokens = [];
     this.keywords = ['int', 'return', 'void', 'if', 'else', 'while', 'for'];
-    this.operators = ['+', '-', '*', '/', '=', ';', '(', ')', '{', '}', '<', '>', ',', '#', '%'];
+    this.operators = ['+', '-', '*', '/', '=', ';', '(', ')', '{', '}', '<', '>', ',', '#', '%', '<=', '>=', '==', '!='];
     this.current_line = 1;
   }
 
@@ -83,7 +83,27 @@ class Lexer {
         continue;
       }
 
-      // Operators and punctuation
+      // Operators and punctuation (handle multi-character operators)
+      if (char === '<' && this.pos + 1 < this.code.length && this.code[this.pos + 1] === '=') {
+        this.tokens.push({ type: 'operator', value: '<=' });
+        this.pos += 2;
+        continue;
+      }
+      if (char === '>' && this.pos + 1 < this.code.length && this.code[this.pos + 1] === '=') {
+        this.tokens.push({ type: 'operator', value: '>=' });
+        this.pos += 2;
+        continue;
+      }
+      if (char === '=' && this.pos + 1 < this.code.length && this.code[this.pos + 1] === '=') {
+        this.tokens.push({ type: 'operator', value: '==' });
+        this.pos += 2;
+        continue;
+      }
+      if (char === '!' && this.pos + 1 < this.code.length && this.code[this.pos + 1] === '=') {
+        this.tokens.push({ type: 'operator', value: '!=' });
+        this.pos += 2;
+        continue;
+      }
       if (this.operators.includes(char)) {
         this.tokens.push({ type: 'operator', value: char });
         this.pos++;

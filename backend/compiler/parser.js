@@ -10,7 +10,9 @@ import {
   Identifier,
   IfStatement,
   BinaryExpression,
-  BlockStatement
+  BlockStatement,
+  ForStatement,
+  AssignmentStatement
 } from './ast.js';
 
 export class Parser {
@@ -105,6 +107,10 @@ export class Parser {
           return this.parseReturnStatement();
         case 'if':
           return this.parseIfStatement();
+        case 'for':
+          return this.parseForStatement();
+        case 'int':
+          return this.parseVariableDeclarationStatement();
         default:
           throw new Error(`Unsupported keyword: ${token.value}`);
       }
@@ -123,6 +129,12 @@ export class Parser {
         this.consume('operator', ')');
         this.consume('operator', ';');
         return new FunctionCall(name, args);
+      } else if (this.peek().type === 'operator' && this.peek().value === '=') {
+        // Handle assignment statements like "sum = sum + i;"
+        this.consume('operator', '=');
+        const value = this.parseExpression();
+        this.consume('operator', ';');
+        return new AssignmentStatement(new Identifier(name), value);
       }
       throw new Error(`Unexpected identifier: ${name}`);
     }
@@ -143,7 +155,7 @@ export class Parser {
     
     // Handle binary operators
     while (this.peek() && this.peek().type === 'operator' && 
-           ['<', '>', '=', '+', '-', '*', '/', '%'].includes(this.peek().value)) {
+           ['<', '>', '<=', '>=', '==', '!=', '+', '-', '*', '/', '%'].includes(this.peek().value)) {
       const operator = this.consume('operator').value;
       const right = this.parsePrimary();
       left = new BinaryExpression(left, operator, right);
@@ -207,6 +219,51 @@ export class Parser {
     } else {
       return this.parseStatement();
     }
+  }
+
+  parseVariableDeclarationStatement() {
+    this.consume('keyword', 'int');
+    const name = this.consume('identifier').value;
+    this.consume('operator', '=');
+    const value = this.parseExpression();
+    this.consume('operator', ';');
+    return new VariableDeclaration(new Identifier(name), value);
+  }
+
+  parseForStatement() {
+    this.consume('keyword', 'for');
+    this.consume('operator', '(');
+    
+    // Parse initialization (int i=1)
+    let init = null;
+    if (this.peek().type === 'keyword' && this.peek().value === 'int') {
+      this.consume('keyword', 'int');
+      const name = this.consume('identifier').value;
+      this.consume('operator', '=');
+      const value = this.parseExpression();
+      init = new VariableDeclaration(new Identifier(name), value);
+    }
+    this.consume('operator', ';');
+    
+    // Parse condition (i<=10)
+    const condition = this.parseExpression();
+    this.consume('operator', ';');
+    
+    // Parse update (i=i+1)
+    let update = null;
+    if (this.peek().type === 'identifier') {
+      const name = this.consume('identifier').value;
+      this.consume('operator', '=');
+      const value = this.parseExpression();
+      update = new AssignmentStatement(new Identifier(name), value);
+    }
+    
+    this.consume('operator', ')');
+    
+    // Parse body
+    const body = this.parseBlockOrStatement();
+    
+    return new ForStatement(init, condition, update, body);
   }
 
   parseVariableDeclaration(name) {
