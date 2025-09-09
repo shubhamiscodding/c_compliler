@@ -15,20 +15,24 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 // Configure auth for development environment
-if (window.location.hostname === 'localhost') {
+if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
   // Don't connect to emulator in production, only use it if explicitly set up
   // connectAuthEmulator(auth, 'http://localhost:9099');
 }
 
 // Initialize Analytics only if not blocked
 let analytics = null;
-if (typeof window !== 'undefined' && !window.isAnalyticsBlocked) {
-  try {
-    const { getAnalytics } = require('firebase/analytics');
-    analytics = getAnalytics(app);
-  } catch (error) {
-    console.log('Analytics blocked or unavailable');
-  }
-}
+// Disable analytics for now to avoid import errors
+// if (typeof window !== 'undefined' && !window.isAnalyticsBlocked) {
+//   try {
+//     import('firebase/analytics').then(({ getAnalytics }) => {
+//       analytics = getAnalytics(app);
+//     }).catch(() => {
+//       console.log('Analytics blocked or unavailable');
+//     });
+//   } catch (error) {
+//     console.log('Analytics blocked or unavailable');
+//   }
+// }
 
 export { app, auth, analytics };

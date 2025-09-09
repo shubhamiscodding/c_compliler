@@ -26,6 +26,7 @@ int main() {
     try {
       // Configure GitHub provider
       const provider = new GithubAuthProvider();
+      provider.addScope('user:email');
       provider.setCustomParameters({
         'allow_signup': 'true'
       });
@@ -45,9 +46,11 @@ int main() {
       } else if (err.code === 'auth/cancelled-popup-request') {
         console.log('Login cancelled by user');
       } else if (err.code === 'auth/unauthorized-domain') {
-        alert('This domain is not authorized for OAuth operations. Please add it in your Firebase Console.');
+        alert('This domain is not authorized for OAuth operations. Please add localhost:5173 to authorized domains in your Firebase Console.');
+      } else if (err.code === 'auth/redirect-uri-mismatch') {
+        alert('Redirect URI mismatch. Please add http://localhost:5173 to your Firebase Console authorized domains.');
       } else {
-        alert('Error logging in: ' + err.message);
+        alert('Error logging in: ' + err.message + '\n\nPlease ensure:\n1. GitHub OAuth is enabled in Firebase Console\n2. localhost:5173 is added to authorized domains\n3. Your GitHub OAuth app has the correct redirect URI');
       }
     }
   };

@@ -1,7 +1,7 @@
 import express from 'express';
 import admin from '../firebaseAdmin.js';
 import Lexer from '../compiler/lexer.js';
-import Parser from '../compiler/parser.js';
+import { Parser } from '../compiler/parser.js';
 import CodeGenerator from '../compiler/codegen.js';
 import vm from 'vm';
 import { Octokit } from '@octokit/rest';
@@ -48,12 +48,22 @@ router.post('/compile', async (req, res) => {
     const generator = new CodeGenerator();
     const jsCode = generator.generate(ast);
 
-    console.log('Generated JavaScript:', jsCode);
+    // console.log('Generated JavaScript:', jsCode); // Hide generated JS from output
 
     // Execute in VM for safety
-    const context = { console: { log: (...args) => output += args.join(' ') + '\n' } };
+    const context = { 
+      console: { log: (...args) => output += args.join(' ') + '\n' },
+      printf: (...args) => {
+        const format = args[0];
+        const params = args.slice(1);
+        let result = format.replace(/%(d|s|f)/g, () => params.shift());
+        output += result;
+        return result;
+      }
+    };
     vm.createContext(context);
-    vm.runInContext(jsCode, context, { timeout: 5000 });
+    const result = vm.runInContext(jsCode, context, { timeout: 5000 });
+    if (result) output += result;
 
     // Restore console.log
     console.log = originalLog;

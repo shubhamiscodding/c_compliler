@@ -4,7 +4,7 @@ class Lexer {
     this.pos = 0;
     this.tokens = [];
     this.keywords = ['int', 'return', 'void', 'if', 'else', 'while', 'for'];
-    this.operators = ['+', '-', '*', '/', '=', ';', '(', ')', '{', '}', '<', '>', ',', '#'];
+    this.operators = ['+', '-', '*', '/', '=', ';', '(', ')', '{', '}', '<', '>', ',', '#', '%'];
     this.current_line = 1;
   }
 

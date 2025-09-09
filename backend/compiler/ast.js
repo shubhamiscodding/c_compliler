@@ -65,9 +65,27 @@ export class Identifier {
   }
 }
 
-export class NumberLiteral {
-  constructor(value) {
-    this.type = 'NumberLiteral';
-    this.value = value;
+export class IfStatement {
+  constructor(condition, consequent, alternate = null) {
+    this.type = 'IfStatement';
+    this.condition = condition;
+    this.consequent = consequent;
+    this.alternate = alternate;
+  }
+}
+
+export class BinaryExpression {
+  constructor(left, operator, right) {
+    this.type = 'BinaryExpression';
+    this.left = left;
+    this.operator = operator;
+    this.right = right;
+  }
+}
+
+export class BlockStatement {
+  constructor(body) {
+    this.type = 'BlockStatement';
+    this.body = body;
   }
 }
